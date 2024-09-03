@@ -2,6 +2,7 @@ import Tesseract from "tesseract.js";
 import { listAllFiles } from "../server/google-api.js";
 import { convertPdfToImages } from "../utils/convertPdfToImage.js";
 import { downloadFile } from "../utils/downloadFile.js";
+import { deleteFile } from "../utils/deleteFile.js";
 
 export async function pdfOCR() {
   const folderId = "1Lf15vSzfQw0YyH_RhbXXKspPdzlqgsao";
@@ -31,6 +32,9 @@ export async function pdfOCR() {
       } catch (err) {
         console.error(`Error processing ${file.name} (${file.id}):`, err);
       }
+      
+      deleteFile(pdfFilePath);
+      deleteFile(imageFilePath);
     }
   } catch (err) {
     console.error("Error in pdfOCR:", err);

@@ -1,3 +1,3 @@
-import { pdfOCR } from "./ocr.js";
+import { pdfOCR } from "./services/ocr.js";
 
 await pdfOCR();
