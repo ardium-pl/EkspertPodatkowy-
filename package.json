@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^7.12.1",
+    "@google-cloud/vision": "^4.3.2",
     "dotenv": "^16.4.5",
     "googleapis": "^143.0.0",
     "node-poppler": "^7.2.2",
