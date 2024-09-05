@@ -25,7 +25,6 @@ export async function downloadFile(fileId, saveFolder, fileName) {
   
       // Save the file as a PDF
       fs.writeFileSync(pdfFilePath, Buffer.from(res.data, "binary"));
-      console.log(`Saved PDF file at ${pdfFilePath}`);
   
       return pdfFilePath;
     } catch (err) {

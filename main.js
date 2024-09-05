@@ -1,3 +1,8 @@
 import { pdfOCR } from "./services/ocr.js";
 
-await pdfOCR();
+async function main() {
+    const rawData = await pdfOCR();
+    console.log(rawData);
+}
+
+main();

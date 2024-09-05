@@ -12,8 +12,13 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "googleapis": "^143.0.0",
+    "node-poppler": "^7.2.2",
+    "pdf-image": "^2.0.0",
     "pdf-lib": "^1.17.1",
+    "pdf-poppler": "^0.2.1",
     "pdf2pic": "^3.1.1",
+    "pg": "^8.12.0",
+    "postgres": "^3.4.4",
     "sharp": "^0.33.5",
     "tesseract.js": "^5.1.1"
   }
