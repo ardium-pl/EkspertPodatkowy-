@@ -1,7 +1,7 @@
 import vision from "@google-cloud/vision";
 import dotenv from "dotenv";
-import fs from "fs"; // Add the fs module for file system operations
-import path from "path"; // Use path for cross-platform file paths
+import fs from "fs";
+import path from "path";
 import { listAllFiles } from "../server/google-api.js";
 import { convertPdfToImages } from "../utils/convertPdfToImage.js";
 import { deleteFile } from "../utils/deleteFile.js";
@@ -14,7 +14,7 @@ const VISION_AUTH = {
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
     private_key: process.env.GOOGLE_PRIVATE_KEY, 
   }
-}
+};
 
 export async function pdfOCR() {
   const folderId = "1Lf15vSzfQw0YyH_RhbXXKspPdzlqgsao";
@@ -37,22 +37,24 @@ export async function pdfOCR() {
 
       const pdfFilePath = await downloadFile(file.id, inputPdfFolder, file.name);
 
-      const imageFilePath = await convertPdfToImages(pdfFilePath, imagesFolder);
+      const imageFilePaths = await convertPdfToImages(pdfFilePath, imagesFolder);
       let extractedText = '';
 
       try {
-        // Perform OCR on the image using Google Vision API
-        const [result] = await client.documentTextDetection(imageFilePath);
-        const fullTextAnnotation = result.fullTextAnnotation;
+        for (const imageFilePath of imageFilePaths) {
+          const [result] = await client.documentTextDetection(imageFilePath);
+          const fullTextAnnotation = result.fullTextAnnotation;
 
           if (fullTextAnnotation) {
             extractedText += fullTextAnnotation.text; 
           }
-        
+
+          deleteFile(imageFilePath);
+        }
 
         results.push({
           fileName: file.name,
-          imagePath: imageFilePath,
+          imagePaths: imageFilePaths,
           extractedText,
         });
 
@@ -65,7 +67,6 @@ export async function pdfOCR() {
       }
 
       deleteFile(pdfFilePath);
-      deleteFile(imageFilePath);
     }
 
     return results;
