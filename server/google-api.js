@@ -11,27 +11,44 @@ export const auth = new google.auth.JWT({
 });
 
 export async function listAllFiles(folderId) {
-    const drive = google.drive({ version: "v3", auth: auth });
-  
+  const drive = google.drive({ version: "v3", auth: auth });
+
+  async function listFilesInFolder(folderId) {
+    let allFiles = [];
+    let pageToken = null;
+
     try {
-      let allFiles = [];
-      let pageToken = null;
-  
       do {
         const res = await drive.files.list({
-          q: `'${folderId}' in parents and mimeType != 'application/vnd.google-apps.folder'`, //query to not to read folder as a file
+          q: `'${folderId}' in parents`,
           pageSize: 100,
           fields: "nextPageToken, files(id, name, mimeType)",
           pageToken: pageToken,
         });
-  
-        allFiles = allFiles.concat(res.data.files);
+
+        const files = res.data.files || [];
+        
+        // Separate folders and files
+        const folderFiles = files.filter(file => file.mimeType !== "application/vnd.google-apps.folder");
+        const subfolders = files.filter(file => file.mimeType === "application/vnd.google-apps.folder");
+
+        allFiles = allFiles.concat(folderFiles);
+
+        // Recursively get files from subfolders
+        for (const subfolder of subfolders) {
+          const subfolderFiles = await listFilesInFolder(subfolder.id);
+          allFiles = allFiles.concat(subfolderFiles);
+        }
+
         pageToken = res.data.nextPageToken;
       } while (pageToken);
-  
+
       return allFiles;
     } catch (err) {
       console.error("Error listing files:", err);
       throw err;
     }
   }
+
+  return await listFilesInFolder(folderId);
+}
