@@ -7,13 +7,25 @@ async function main() {
 
         for (const item of processedData) {
             console.log(`File: ${item.fileName}`);
-            console.log(`Invoice Number: ${item.structuredData.invoiceNumber}`);
-            console.log(`Seller: ${item.structuredData.sellerName}`);
-            console.log(`Total Value: ${item.structuredData.invoiceBruttoValue}`);
+
+            console.log("Google Vision Results:");
+            console.log(`Invoice Number: ${item.googleVisionData.invoiceNumber}`);
+            console.log(`Seller: ${item.googleVisionData.sellerName}`);
+            console.log(`Total Value: ${item.googleVisionData.invoiceBruttoValue}`);
             console.log("Products:");
-            item.structuredData.products.forEach((product, index) => {
+            item.googleVisionData.products.forEach((product, index) => {
                 console.log(`  ${index + 1}. ${product.name} - Quantity: ${product.quantity}, Price: ${product.gross_price}`);
             });
+
+            console.log("\nGPT Vision Results:");
+            console.log(`Invoice Number: ${item.gptVisionData.invoiceNumber}`);
+            console.log(`Seller: ${item.gptVisionData.sellerName}`);
+            console.log(`Total Value: ${item.gptVisionData.invoiceBruttoValue}`);
+            console.log("Products:");
+            item.gptVisionData.products.forEach((product, index) => {
+                console.log(`  ${index + 1}. ${product.name} - Quantity: ${product.quantity}, Price: ${product.gross_price}`);
+            });
+
             console.log("---");
         }
     } catch (error) {

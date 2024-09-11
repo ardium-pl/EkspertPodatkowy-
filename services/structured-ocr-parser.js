@@ -50,7 +50,7 @@ async function parseOCRText(ocrText) {
     if (message?.parsed) {
         return message.parsed;
     } else if (message?.refusal) {
-        throw new Error(`AI refused to process the text: ${message.refusal}`);
+        throw new Error(` 🤖 AI refused to process the text: ${message.refusal}`);
     } else {
         throw new Error('Failed to parse OCR text');
     }
