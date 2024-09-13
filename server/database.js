@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import pkg from "pg";
-import {rawData} from "../services/invoice-data-service.js";
-import {removeDecimal} from "../utils/valuesAdjustment.js";
+import { removeDecimal } from "../utils/valuesAdjustment.js";
+import { mapVatRate } from "../utils/valuesAdjustment.js";
 
 dotenv.config();
 
@@ -15,7 +15,7 @@ const client = new Client({
     password: process.env.PGPASSWORD,
 });
 
-export async function insertInvoiceBaseData(rawData) {
+export async function insertInvoiceBaseData(rawData, id) {
     const baseInvoiceQuery = `
         INSERT INTO b7.inv_hdr (id, per, type, rk, nr, suffix, doc_date, age_date, ship_date, ship_date_type,
                                 ship_monthly, name, address,
@@ -40,26 +40,29 @@ export async function insertInvoiceBaseData(rawData) {
                                zw_typ, zw_basis, art100, appx15)
         VALUES ($1, $2, $3, false, 0, $4, $5, $6, $7, $8, 0, null, null, false, false)
     `;
-
+    console.log(rawData);
     const baseInvoiceValues = [
-        rawData.id,
-        rawData.nr,
+        parseInt(id),
+        parseInt(id) + 5,
         rawData.invoiceNumber,
         rawData.documentDate,
-        rawData.ageDate,
+        rawData.shipDate,
         rawData.shipDate,
         rawData.sellerName,
         rawData.address,
-        removeDecimal(rawData.invoiceBruttoValue),
+        removeDecimal(parseFloat(rawData.invoiceBruttoValue.toString())),
         rawData.bankAccount,
-        rawData.paid,
-        rawData.bal_date,
+        true,
+        rawData.shipDate,
         rawData.sellerNip,
         rawData.sellerNip,
-        rawData.pro_forma_id,
-        rawData.marza,
-        rawData.vat_included,
+        parseInt(id),
+        0,
+        false,
     ];
+
+    console.log(baseInvoiceValues);
+
 
     try {
         await client.connect();
@@ -70,15 +73,17 @@ export async function insertInvoiceBaseData(rawData) {
         // Loop through the products array and insert each product
         for (const [index, product] of rawData.products.entries()) {
             const productValues = [
-                rawData.id,        // inv_id (invoice id)
-                rawData.id,  // apply_id (apply id from invoice)
+                parseInt(id),        // inv_id (invoice id)
+                parseInt(id),  // apply_id (apply id from invoice)
                 index + 1,         // nr (line number, incremented)
-                product.name,      // descr (product description)
-                removeDecimal(product.net_price), // unit_price (net price per unit)
-                product.quantity,  // qty (quantity)
-                product.vat_rate,  // tax_id (vat rate)
-                product.index      // gtu (product index or identifier)
+                product.index,      // descr (product description)
+                removeDecimal(parseFloat(product.net_price.toString())), // unit_price (net price per unit)
+                product.quantity * 1000,  // qty (quantity)
+                mapVatRate(product.vat_rate),  // tax_id (vat rate)
+                product.name      // gtu (product index or identifier)
             ];
+
+            console.log(parseFloat(product.net_price.toString()));
 
             await client.query(productsQuery, productValues);
         }
@@ -90,5 +95,3 @@ export async function insertInvoiceBaseData(rawData) {
         await client.end();
     }
 }
-
-insertInvoiceBaseData(rawData);

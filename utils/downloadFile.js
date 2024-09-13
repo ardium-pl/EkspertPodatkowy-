@@ -18,7 +18,6 @@ export async function downloadFile(fileId, saveFolder, fileName) {
   
       const pdfFilePath = path.join(saveFolder, fileName);
   
-      // Ensure the directory exists before saving the file
       if (!fs.existsSync(saveFolder)) {
         fs.mkdirSync(saveFolder, { recursive: true });
       }

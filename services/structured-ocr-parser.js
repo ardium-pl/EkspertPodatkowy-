@@ -32,14 +32,14 @@ const InvoiceData = z.object({
     products: z.array(Product)
 });
 
-async function parseOCRText(ocrText) {
+export async function parseOCRText(ocrText) {
     const completion = await client.beta.chat.completions.parse({
         model: "gpt-4o-2024-08-06",
         messages: [
             {
                 role: "system",
                 content: "You are an expert in parsing invoice data from OCR text. Extract the relevant information and " +
-                    "structure it according to the provided schema."
+                    "structure it according to the provided schema. Remember to parse values with 2 places after decimal, so e.g. 156.60 etc."
             },
             { role: "user", content: ocrText }
         ],
@@ -56,4 +56,3 @@ async function parseOCRText(ocrText) {
     }
 }
 
-export { parseOCRText };

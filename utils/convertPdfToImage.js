@@ -12,6 +12,10 @@ export async function convertPdfToImages(pdfFilePath, saveFolder) {
     );
     const outputFilePath = path.join(saveFolder, `${outputPrefix}`);
     const pdfInfo = {}
+    
+    if (!fs.existsSync(saveFolder)) {
+      fs.mkdirSync(saveFolder, { recursive: true });
+    }
 
     try {
         console.log(`Getting PDF info for: ${pdfFilePath}`);

@@ -8,6 +8,7 @@ import {deleteFile} from "../utils/deleteFile.js";
 import {downloadFile} from "../utils/downloadFile.js";
 import {parseOCRText} from "./structured-ocr-parser.js";
 import {performGPTVisionOCR} from "./gpt-vision-ocr.js";
+import { checkIfFileExistsInDatabase, insertFileIntoDatabase } from "../server/fileDb.js";
 
 dotenv.config();
 
@@ -18,8 +19,7 @@ const VISION_AUTH = {
     }
 };
 
-export async function pdfOCR() {
-    const folderId = "1Lf15vSzfQw0YyH_RhbXXKspPdzlqgsao";
+export async function pdfOCR(files) {
     const inputPdfFolder = "./input-pdf";
     const imagesFolder = "./images";
     const outputTextFolder = "./output-text";
@@ -34,12 +34,18 @@ export async function pdfOCR() {
     const client = new vision.ImageAnnotatorClient(VISION_AUTH);
 
     try {
-        console.log(" 💾 Listing files from Google Drive...");
-        const files = await listAllFiles(folderId);
-        console.log(` 💾 Found ${files.length} files`);
         const results = [];
 
         for (const file of files) {
+
+            let alreadyProcessed = await checkIfFileExistsInDatabase(file.name);
+            console.log(`Checking if file has already been processed: ${file.name}`);
+            
+            if (alreadyProcessed) {
+                console.log(`Skipping ${file.name}, it has already been processed.`);
+                continue;
+            }
+
             console.log(` ♻️ Processing file: ${file.name} (${file.id})`);
 
             try {
@@ -74,10 +80,13 @@ export async function pdfOCR() {
                 const googleVisionStructuredData = await parseOCRText(googleVisionText);
                 const gptVisionStructuredData = await parseOCRText(gptVisionText);
 
+                // Insert the processed file data into the database
+                await insertFileIntoDatabase(file.name, googleVisionText, googleVisionStructuredData);
+
                 results.push({
                     fileName: file.name,
                     googleVisionData: googleVisionStructuredData,
-                    gptVisionData: gptVisionStructuredData,
+                    // gptVisionData: gptVisionStructuredData,
                 });
 
                 // Save results
