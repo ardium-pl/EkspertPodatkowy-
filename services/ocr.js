@@ -2,13 +2,12 @@ import vision from "@google-cloud/vision";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
-import {listAllFiles} from "../server/google-api.js";
-import {convertPdfToImages} from "../utils/convertPdfToImage.js";
-import {deleteFile} from "../utils/deleteFile.js";
-import {downloadFile} from "../utils/downloadFile.js";
-import {parseOCRText} from "./structured-ocr-parser.js";
-import {performGPTVisionOCR} from "./gpt-vision-ocr.js";
-import { checkIfFileExistsInDatabase, insertFileIntoDatabase } from "../server/fileDb.js";
+import { checkIfFileExistsInDatabase } from "../server/fileDb.js";
+import { convertPdfToImages } from "../utils/convertPdfToImage.js";
+import { deleteFile } from "../utils/deleteFile.js";
+import { downloadFile } from "../utils/downloadFile.js";
+import { performGPTVisionOCR } from "./gpt-vision-ocr.js";
+import { parseOCRText } from "./structured-ocr-parser.js";
 
 dotenv.config();
 
@@ -80,11 +79,10 @@ export async function pdfOCR(files) {
                 const googleVisionStructuredData = await parseOCRText(googleVisionText);
                 const gptVisionStructuredData = await parseOCRText(gptVisionText);
 
-                // Insert the processed file data into the database
-                await insertFileIntoDatabase(file.name, googleVisionText, googleVisionStructuredData);
 
                 results.push({
                     fileName: file.name,
+                    googleVisionText: googleVisionText,
                     googleVisionData: googleVisionStructuredData,
                     // gptVisionData: gptVisionStructuredData,
                 });
@@ -111,7 +109,6 @@ export async function pdfOCR(files) {
                     console.log(`Deleting temporary PDF: ${pdfPath}`);
                     deleteFile(pdfPath);
                 }
-                const imagePattern = path.join(imagesFolder, path.basename(file.name, '.pdf') + '-*.png');
                 const imagePaths = fs.readdirSync(imagesFolder)
                     .filter(f => f.startsWith(path.basename(file.name, '.pdf') + '-'))
                     .map(f => path.join(imagesFolder, f));

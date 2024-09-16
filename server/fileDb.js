@@ -29,11 +29,11 @@ export async function checkIfFileExistsInDatabase(fileName) {
     }
   }
 
-export async function insertFileIntoDatabase(fileName, ocrText, structuredJson) {
+export async function insertFileIntoDatabase(fileName, ocrText, structuredJson, tableName) {
     try {
       const insertDate = new Date(); 
       await client.query(
-        `INSERT INTO files (file_name, insert_date, ocr_text, structured_json) VALUES ($1, $2, $3, $4)`,
+        `INSERT INTO ${tableName} (file_name, insert_date, ocr_text, structured_json) VALUES ($1, $2, $3, $4)`,
         [fileName, insertDate, ocrText, structuredJson]
       );
       console.log(`Successfully inserted ${fileName} into the database`);

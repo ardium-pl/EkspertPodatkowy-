@@ -40,7 +40,6 @@ export async function insertInvoiceBaseData(rawData, id) {
                                zw_typ, zw_basis, art100, appx15)
         VALUES ($1, $2, $3, false, 0, $4, $5, $6, $7, $8, 0, null, null, false, false)
     `;
-    console.log(rawData);
     const baseInvoiceValues = [
         parseInt(id),
         parseInt(id) + 5,
